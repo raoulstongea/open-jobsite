@@ -1,0 +1,33 @@
+name: Field workflow proposal
+description: Propose a construction or building-operations workflow.
+title: "[Workflow]: "
+labels: ["field-workflow"]
+body:
+  - type: textarea
+    id: user
+    attributes:
+      label: Field user and situation
+      description: Who is doing what, using only synthetic or generalized details?
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Inputs and evidence
+      description: What notes, measurements, documents, or other evidence exist?
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Reviewable outcome
+      description: What draft or calculation should result, and who must approve it?
+    validations:
+      required: true
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: Privacy check
+      options:
+        - label: This proposal contains no private or identifying job data.
+          required: true
