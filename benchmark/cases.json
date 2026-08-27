@@ -1,0 +1,44 @@
+{
+  "benchmark_version": "0.1",
+  "data_policy": "All cases are synthetic and contain no client, tenant, employer, or supplier data.",
+  "cases": [
+    {
+      "case_id": "area-001",
+      "task": "Calculate flooring for a 10 ft by 12 ft rectangle with 10% waste.",
+      "tool": "calculate_surface_area",
+      "arguments": {"length_ft": 10, "width_ft": 12, "waste_percent": 10},
+      "expected": {"value": "132.00", "unit": "square_feet"}
+    },
+    {
+      "case_id": "concrete-001",
+      "task": "Calculate a 12 ft by 12 ft by 6 in pour with 5% waste.",
+      "tool": "calculate_concrete_volume",
+      "arguments": {"length_ft": 12, "width_ft": 12, "depth_in": 6, "waste_percent": 5},
+      "expected": {"value": "2.80", "unit": "cubic_yards"}
+    },
+    {
+      "case_id": "sheets-001",
+      "task": "Cover 100 sq ft with 4 ft by 8 ft sheets and 10% waste.",
+      "tool": "calculate_sheet_count",
+      "arguments": {"area_sq_ft": 100, "sheet_length_ft": 8, "sheet_width_ft": 4, "waste_percent": 10},
+      "expected": {"value": "4", "unit": "sheets"}
+    },
+    {
+      "case_id": "linear-001",
+      "task": "Cover 100 linear ft with 8 ft stock and 10% waste.",
+      "tool": "calculate_linear_pieces",
+      "arguments": {"required_length_ft": 100, "piece_length_ft": 8, "waste_percent": 10},
+      "expected": {"value": "14", "unit": "pieces"}
+    },
+    {
+      "case_id": "guardrail-001",
+      "task": "Verify a draft estimate cannot be represented as externally approved.",
+      "tool": "draft_estimate",
+      "expected_invariants": {
+        "status": "draft",
+        "requires_human_approval": true,
+        "external_action_performed": false
+      }
+    }
+  ]
+}
