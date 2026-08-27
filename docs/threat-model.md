@@ -12,7 +12,7 @@
 | Threat | Consequence | Current control | Remaining work |
 |---|---|---|---|
 | Path traversal in a project ID | Read/write outside the data folder | Strict lowercase ID pattern | Add platform-specific tests |
-| Partial/corrupt local write | Lost or invalid project state | Temp file, `fsync`, atomic replace | Backups and revision history |
+| Partial/corrupt or overlapping local write | Lost or invalid project state | Temp file, `fsync`, atomic replace, process-level write lock | Backups, revision history, and multi-process locking |
 | Invented evidence link | Misleading provenance | Artifact IDs checked against project evidence | Evidence hashing and attachment metadata |
 | Bad unit math | Cost/material error | `Decimal`, formulas, intermediate values, tests | Property and unit-conversion tests |
 | Silent quote or change approval | Unwanted financial commitment | Draft status, approval flag, no external connectors | Signed approval state machine |

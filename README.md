@@ -76,19 +76,19 @@ Run the MCP server over stdio:
 uv run open-jobsite
 ```
 
-## One-minute Berd demo
+## Synthetic demo
 
-The [`demo/`](demo/) folder contains a synthetic end-to-end workflow, a prompt
-ready to paste into Berd, fixed expected results, Windows connection settings,
-and a preflight that launches the real STDIO server. Run it with:
+The [`demo/`](demo/) folder contains a synthetic end-to-end workflow, a prompt,
+fixed expected results, a Windows goose CLI launcher, and a preflight that
+launches the real STDIO server. Run the preflight with:
 
 ```bash
 uv run python demo/run_demo.py
 ```
 
 The preflight is also part of GitHub Actions. It verifies the same evidence,
-calculation, estimate, daily log, and approval-gate flow used in the recorded
-Berd demonstration.
+calculation, estimate, daily log, and approval-gate flow intended for a future
+screen recording. A recording is not included in v0.1.
 
 Data defaults to `.open-jobsite-data/`. Select another local folder with either
 `--data-dir PATH` or the `OPEN_JOBSITE_DATA_DIR` environment variable.
@@ -102,14 +102,30 @@ goose Desktop with:
 - Arguments: `run --directory C:\absolute\path\to\open-jobsite open-jobsite`
 - Environment: optionally set `OPEN_JOBSITE_DATA_DIR` to a private job-data folder
 
-Use only synthetic data in a public demo. The next proof step is to run the
-included benchmark scenarios through goose on Windows and record the full
-evidence-to-draft flow.
+Use only synthetic data in a public demo. The synthetic prompt has been run
+through goose CLI 1.46.0 on Windows; see the
+[`verification record`](demo/windows-goose-verification.md). A Berd-local MCP
+run has not yet been verified.
+
+## Verified v0.1 evidence
+
+As of 2026-08-27:
+
+- 28 automated tests pass on Windows.
+- all five synthetic benchmark cases pass, including four exact numeric cases
+  and three approval invariants.
+- the real STDIO preflight produces 108 square feet, four sheets, a CAD 344.00
+  subtotal, a CAD 378.40 total, and 6.00 labor hours.
+- an isolated Windows goose CLI run produced two evidence records and two draft
+  artifacts with the same expected values.
+
+These are narrow software checks, not claims about field accuracy, estimating
+accuracy, code compliance, or user outcomes.
 
 ## Example MCP arguments
 
-Complex inputs are JSON strings so the tools remain portable across MCP clients.
-For `draft_estimate`, a minimal `line_items_json` value is:
+Complex inputs use typed arrays so goose can see the required fields in the MCP
+schema. For `draft_estimate`, a minimal `line_items` value is:
 
 ```json
 [
@@ -130,6 +146,7 @@ The evidence ID must already exist in the same project.
 - `src/open_jobsite/`: deterministic core, local store, artifacts, MCP tools
 - `skills/`: portable field-workflow instructions for goose
 - `benchmark/`: synthetic, machine-readable evaluation cases
+- `demo/`: reproducible preflight, Windows goose launcher, and recording plan
 - `examples/`: a synthetic example project record
 - `tests/`: core and in-process MCP protocol tests
 - `docs/architecture.md`: component and trust-boundary design

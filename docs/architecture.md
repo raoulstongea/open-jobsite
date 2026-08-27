@@ -20,8 +20,8 @@ flowchart TD
 - `artifacts.py` builds daily logs, estimates, and change orders. It marks them as
   drafts and records unit math, assumptions, exclusions, and evidence IDs.
 - `store.py` validates project identifiers and atomically writes local JSON.
-- `server.py` provides a small MCP surface. It converts portable JSON-string
-  arguments to typed core calls and saves only local state.
+- `server.py` provides a small MCP surface. Its constrained values and nested
+  input shapes are visible in MCP JSON Schema, and it saves only local state.
 - `skills/` tells an agent how to gather inputs, call tools, and stop for review.
 
 ## Data model v0.1

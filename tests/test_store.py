@@ -1,4 +1,5 @@
 import json
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 import pytest
@@ -31,6 +32,29 @@ def test_duplicate_project_is_rejected(tmp_path: Path) -> None:
     store.create_project("demo", "Demo")
     with pytest.raises(FileExistsError):
         store.create_project("demo", "Duplicate")
+
+
+def test_concurrent_evidence_writes_do_not_lose_an_update(tmp_path: Path) -> None:
+    store = JobsiteStore(tmp_path)
+    store.create_project("parallel", "Parallel test")
+
+    def record(index: int) -> dict:
+        return JobsiteStore(tmp_path).record_evidence(
+            "parallel",
+            "note",
+            f"synthetic source {index}",
+            f"Synthetic note {index}",
+            "synthetic",
+        )
+
+    with ThreadPoolExecutor(max_workers=2) as executor:
+        recorded = list(executor.map(record, [1, 2]))
+
+    project = store.get_project("parallel")
+    assert len(project["evidence"]) == 2
+    assert {item["evidence_id"] for item in project["evidence"]} == {
+        item["evidence_id"] for item in recorded
+    }
 
 
 @pytest.mark.parametrize(

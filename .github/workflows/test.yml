@@ -17,5 +17,7 @@ jobs:
           enable-cache: true
       - run: uv sync --extra dev
       - run: uv run pytest
-      - name: Preflight Berd STDIO demo
+      - name: Run five-case synthetic benchmark
+        run: uv run python benchmark/run_benchmarks.py
+      - name: Preflight STDIO demo
         run: uv run python demo/run_demo.py

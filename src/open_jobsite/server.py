@@ -3,9 +3,8 @@
 from __future__ import annotations
 
 import argparse
-import json
 import os
-from typing import Any
+from typing import Any, Literal, NotRequired, TypedDict
 
 from mcp.server import MCPServer
 
@@ -27,18 +26,38 @@ from open_jobsite.store import JobsiteStore
 mcp = MCPServer("Open Jobsite")
 
 
+EvidenceType = Literal[
+    "document",
+    "measurement",
+    "note",
+    "photo",
+    "receipt",
+    "sketch",
+    "voice_transcript",
+]
+PublicationStatus = Literal["private", "synthetic", "permission_cleared"]
+
+
+class WorkerInput(TypedDict):
+    """One worker entry for a daily log."""
+
+    identifier: str
+    role: str
+    hours: float
+
+
+class LineItemInput(TypedDict):
+    """One priced line for an estimate or change order."""
+
+    description: str
+    quantity: float
+    unit: str
+    unit_cost: float
+    evidence_ids: NotRequired[list[str]]
+
+
 def _store() -> JobsiteStore:
     return JobsiteStore()
-
-
-def _json_list(raw: str, field: str) -> list[Any]:
-    try:
-        value = json.loads(raw)
-    except json.JSONDecodeError as exc:
-        raise ValueError(f"{field} must be valid JSON") from exc
-    if not isinstance(value, list):
-        raise ValueError(f"{field} must contain a JSON array")
-    return value
 
 
 @mcp.tool()
@@ -50,12 +69,17 @@ def create_project(project_id: str, name: str, description: str = "") -> dict[st
 @mcp.tool()
 def record_site_evidence(
     project_id: str,
-    evidence_type: str,
+    evidence_type: EvidenceType,
     source_reference: str,
     content: str,
-    publication_status: str = "private",
+    publication_status: PublicationStatus = "private",
 ) -> dict[str, Any]:
-    """Record a local evidence note and its source; this performs no upload."""
+    """Record sourced evidence locally; this performs no upload.
+
+    evidence_type must be document, measurement, note, photo, receipt, sketch,
+    or voice_transcript. publication_status must be private, synthetic, or
+    permission_cleared.
+    """
     return _store().record_evidence(
         project_id,
         evidence_type,
@@ -116,20 +140,20 @@ def draft_daily_log(
     project_id: str,
     work_date: str,
     summary: str,
-    workers_json: str = "[]",
-    evidence_ids_json: str = "[]",
-    assumptions_json: str = "[]",
-    exclusions_json: str = "[]",
+    workers: list[WorkerInput],
+    evidence_ids: list[str],
+    assumptions: list[str] | None = None,
+    exclusions: list[str] | None = None,
 ) -> dict[str, Any]:
-    """Create and locally save a draft daily log. JSON arguments must be arrays."""
+    """Save a draft daily log with worker identifier, role, and hours entries."""
     artifact = make_daily_log(
         project_id,
         work_date,
         summary,
-        _json_list(workers_json, "workers_json"),
-        _json_list(evidence_ids_json, "evidence_ids_json"),
-        _json_list(assumptions_json, "assumptions_json"),
-        _json_list(exclusions_json, "exclusions_json"),
+        workers,
+        evidence_ids,
+        assumptions or [],
+        exclusions or [],
     )
     return _store().save_artifact(project_id, artifact)
 
@@ -138,22 +162,26 @@ def draft_daily_log(
 def draft_estimate(
     project_id: str,
     title: str,
-    line_items_json: str,
-    evidence_ids_json: str = "[]",
-    assumptions_json: str = "[]",
-    exclusions_json: str = "[]",
+    line_items: list[LineItemInput],
+    evidence_ids: list[str],
+    assumptions: list[str] | None = None,
+    exclusions: list[str] | None = None,
     contingency_percent: float = 0,
     tax_percent: float = 0,
     currency: str = "CAD",
 ) -> dict[str, Any]:
-    """Create and save an auditable draft estimate; never send or accept it."""
+    """Save an auditable draft estimate; never send, approve, or accept it.
+
+    Each line item requires description, quantity, unit, and unit_cost, with an
+    optional evidence_ids array.
+    """
     artifact = make_estimate(
         project_id,
         title,
-        _json_list(line_items_json, "line_items_json"),
-        _json_list(evidence_ids_json, "evidence_ids_json"),
-        _json_list(assumptions_json, "assumptions_json"),
-        _json_list(exclusions_json, "exclusions_json"),
+        line_items,
+        evidence_ids,
+        assumptions or [],
+        exclusions or [],
         contingency_percent,
         tax_percent,
         currency,
@@ -166,22 +194,22 @@ def draft_change_order(
     project_id: str,
     title: str,
     reason: str,
-    line_items_json: str,
-    evidence_ids_json: str = "[]",
-    assumptions_json: str = "[]",
-    exclusions_json: str = "[]",
+    line_items: list[LineItemInput],
+    evidence_ids: list[str],
+    assumptions: list[str] | None = None,
+    exclusions: list[str] | None = None,
     schedule_impact_days: float = 0,
     currency: str = "CAD",
 ) -> dict[str, Any]:
-    """Create and save a draft change order with an explicit approval gate."""
+    """Save a draft change order with structured lines and an approval gate."""
     artifact = make_change_order(
         project_id,
         title,
         reason,
-        _json_list(line_items_json, "line_items_json"),
-        _json_list(evidence_ids_json, "evidence_ids_json"),
-        _json_list(assumptions_json, "assumptions_json"),
-        _json_list(exclusions_json, "exclusions_json"),
+        line_items,
+        evidence_ids,
+        assumptions or [],
+        exclusions or [],
         schedule_impact_days,
         currency,
     )

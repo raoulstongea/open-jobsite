@@ -1,15 +1,19 @@
-# Berd demo
+# Goose CLI demo and Berd recording plan
 
-This demo shows Open Jobsite working as a local MCP connection inside Berd. It
-uses synthetic data and does not contact a client, send a quote, order material,
-or approve any work.
+The deterministic flow in this folder has been verified through the real Open
+Jobsite STDIO server and goose CLI on Windows. A visible Berd-local MCP run and
+screen recording have not yet been completed. The prompt and shot list are
+ready for that proof step.
+
+All inputs are synthetic. Nothing here contacts a client, sends a quote, orders
+material, or approves work.
 
 ## What the reviewer should see
 
-In one short conversation, Berd should:
+In one short goose or Berd conversation, the reviewer should see:
 
 1. Create a local training project.
-2. save two source notes as evidence.
+2. Save two source notes as evidence.
 3. calculate 108 square feet and four 4 by 8 sheets with 10 percent waste.
 4. draft a CAD 378.40 estimate and a six-hour daily log.
 5. show that both artifacts still require human approval and that no external
@@ -27,41 +31,47 @@ uv run python demo/run_demo.py
 ```
 
 The preflight starts `open-jobsite` as a separate STDIO process, calls the same
-tools Berd will call, checks the expected values, and prints a short JSON
+tools an MCP client calls, checks the expected values, and prints a short JSON
 summary. This is also run by GitHub Actions.
 
-## Add the connection in Berd
+If Windows has the goose-bundled `uv.exe` but it is not on `PATH`, set its exact
+path for the preflight:
 
-Open **Connections** in Berd and add a local MCP for Goose with these values:
-
-- Name: `Open Jobsite`
-- Type: `STDIO`
-- Command: the full path returned by `where uv`
-- Arguments: `run`, `--directory`, the absolute repository path, `open-jobsite`
-- Environment variable: `OPEN_JOBSITE_DATA_DIR` set to a new private demo folder
-- Timeout: `300`
-
-If the connection screen accepts one command line instead of separate arguments,
-use:
-
-```text
-C:\absolute\path\to\uv.exe run --directory C:\absolute\path\to\open-jobsite open-jobsite
+```powershell
+$env:OPEN_JOBSITE_UV = "$env:LOCALAPPDATA\Goose\bin\uv.exe"
+& $env:OPEN_JOBSITE_UV run python demo\run_demo.py
 ```
 
-The equivalent Goose configuration fragment is in
-[`goose-extension.example.yaml`](goose-extension.example.yaml). Merge the entry
-into an existing config. Do not replace the rest of a user's config file.
+To run the same prompt through the installed goose CLI with a fresh synthetic
+data folder, use:
 
-Start a fresh chat after enabling the connection. Ask Berd which Open Jobsite
-tools are available. It should list ten tools. Then paste the complete contents
-of [`berd-prompt.md`](berd-prompt.md).
+```powershell
+.\demo\run_goose_windows.ps1
+```
+
+The observed Windows run and exact persisted checks are documented in
+[`windows-goose-verification.md`](windows-goose-verification.md).
+
+## Berd status
+
+On 2026-08-27 the installed Berd desktop app launched and exposed Home, Agents,
+Skills, Projects, Chats, Settings, and a hosted “Chat with Goose” composer. A
+working local MCP connection for Open Jobsite was not verified in that build.
+Do not describe the demo as a Berd run until Open Jobsite's ten tools are visible
+in Berd and the complete prompt succeeds there.
+
+If a future Berd build exposes local STDIO MCP configuration, use the same
+command, arguments, and isolated data directory documented for goose. The
+equivalent goose configuration fragment is in
+[`goose-extension.example.yaml`](goose-extension.example.yaml).
 
 ## Recording checklist
 
-Keep the recording between 60 and 90 seconds:
+Keep the recording at or under two minutes. The exact shot list and narration
+are in [`recording-script.md`](recording-script.md).
 
-1. Show the enabled Open Jobsite connection.
-2. Paste the prepared prompt into a fresh Berd chat.
+1. Show the enabled Open Jobsite connection and identify the client accurately.
+2. Paste the prepared prompt into a fresh chat in the identified client.
 3. Let the tool calls run without editing their results.
 4. Expand one calculation and the estimate so the evidence and unit math are
    visible.

@@ -34,6 +34,21 @@
       "case_id": "guardrail-001",
       "task": "Verify a draft estimate cannot be represented as externally approved.",
       "tool": "draft_estimate",
+      "arguments": {
+        "project_id": "benchmark",
+        "title": "Synthetic guardrail estimate",
+        "line_items": [
+          {
+            "description": "Synthetic labor",
+            "quantity": 1,
+            "unit": "hour",
+            "unit_cost": 50
+          }
+        ],
+        "evidence_ids": [],
+        "assumptions": ["Synthetic benchmark input"],
+        "exclusions": ["All external action"]
+      },
       "expected_invariants": {
         "status": "draft",
         "requires_human_approval": true,

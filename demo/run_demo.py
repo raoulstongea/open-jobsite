@@ -29,7 +29,7 @@ async def _call(
 
 
 async def run_demo(data_dir: Path, project_id: str) -> dict[str, Any]:
-    uv = shutil.which("uv")
+    uv = os.environ.get("OPEN_JOBSITE_UV") or shutil.which("uv")
     if not uv:
         raise RuntimeError("uv was not found on PATH")
 
@@ -136,27 +136,25 @@ async def run_demo(data_dir: Path, project_id: str) -> dict[str, Any]:
             {
                 "project_id": project_id,
                 "title": "Synthetic training wall repair",
-                "line_items_json": json.dumps(
-                    [
-                        {
-                            "description": "Wallboard",
-                            "quantity": 4,
-                            "unit": "sheet",
-                            "unit_cost": 18.50,
-                            "evidence_ids": [measurement["evidence_id"]],
-                        },
-                        {
-                            "description": "Maintenance labor",
-                            "quantity": 6,
-                            "unit": "hour",
-                            "unit_cost": 45.00,
-                            "evidence_ids": [site_note["evidence_id"]],
-                        },
-                    ]
-                ),
-                "evidence_ids_json": json.dumps(evidence_ids),
-                "assumptions_json": json.dumps(assumptions),
-                "exclusions_json": json.dumps(exclusions),
+                "line_items": [
+                    {
+                        "description": "Wallboard",
+                        "quantity": 4,
+                        "unit": "sheet",
+                        "unit_cost": 18.50,
+                        "evidence_ids": [measurement["evidence_id"]],
+                    },
+                    {
+                        "description": "Maintenance labor",
+                        "quantity": 6,
+                        "unit": "hour",
+                        "unit_cost": 45.00,
+                        "evidence_ids": [site_note["evidence_id"]],
+                    },
+                ],
+                "evidence_ids": evidence_ids,
+                "assumptions": assumptions,
+                "exclusions": exclusions,
                 "contingency_percent": 10,
                 "tax_percent": 0,
                 "currency": "CAD",
@@ -172,23 +170,21 @@ async def run_demo(data_dir: Path, project_id: str) -> dict[str, Any]:
                     "Isolated the work area, removed damaged wallboard, and "
                     "inspected the open cavity."
                 ),
-                "workers_json": json.dumps(
-                    [
-                        {
-                            "identifier": "tech-01",
-                            "role": "maintenance technician",
-                            "hours": 3,
-                        },
-                        {
-                            "identifier": "tech-02",
-                            "role": "maintenance technician",
-                            "hours": 3,
-                        },
-                    ]
-                ),
-                "evidence_ids_json": json.dumps([site_note["evidence_id"]]),
-                "assumptions_json": json.dumps(assumptions),
-                "exclusions_json": json.dumps(exclusions),
+                "workers": [
+                    {
+                        "identifier": "tech-01",
+                        "role": "maintenance technician",
+                        "hours": 3,
+                    },
+                    {
+                        "identifier": "tech-02",
+                        "role": "maintenance technician",
+                        "hours": 3,
+                    },
+                ],
+                "evidence_ids": [site_note["evidence_id"]],
+                "assumptions": assumptions,
+                "exclusions": exclusions,
             },
         )
         project = await _call(client, "get_project", {"project_id": project_id})

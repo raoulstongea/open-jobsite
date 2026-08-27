@@ -6,6 +6,7 @@ import json
 import os
 import re
 import tempfile
+import threading
 from copy import deepcopy
 from datetime import UTC, datetime
 from pathlib import Path
@@ -24,6 +25,7 @@ EVIDENCE_TYPES = {
     "voice_transcript",
 }
 PUBLICATION_STATUSES = {"private", "synthetic", "permission_cleared"}
+_WRITE_LOCK = threading.RLock()
 
 
 def utc_now() -> str:
@@ -94,21 +96,22 @@ class JobsiteStore:
         clean_name = name.strip()
         if not clean_name:
             raise ValueError("name cannot be empty")
-        path = self._path(project_id)
-        if path.exists():
-            raise FileExistsError(f"project already exists: {project_id}")
-        now = utc_now()
-        project: dict[str, Any] = {
-            "schema_version": "0.1",
-            "project_id": project_id,
-            "name": clean_name,
-            "description": description.strip(),
-            "created_at": now,
-            "updated_at": now,
-            "evidence": [],
-            "artifacts": [],
-        }
-        self._write(project_id, project)
+        with _WRITE_LOCK:
+            path = self._path(project_id)
+            if path.exists():
+                raise FileExistsError(f"project already exists: {project_id}")
+            now = utc_now()
+            project: dict[str, Any] = {
+                "schema_version": "0.1",
+                "project_id": project_id,
+                "name": clean_name,
+                "description": description.strip(),
+                "created_at": now,
+                "updated_at": now,
+                "evidence": [],
+                "artifacts": [],
+            }
+            self._write(project_id, project)
         return deepcopy(project)
 
     def get_project(self, project_id: str) -> dict[str, Any]:
@@ -132,31 +135,35 @@ class JobsiteStore:
             raise ValueError("source_reference cannot be empty")
         if not content.strip():
             raise ValueError("content cannot be empty")
-        project = self._read(project_id)
-        evidence = {
-            "evidence_id": f"ev-{uuid4().hex[:12]}",
-            "evidence_type": evidence_type,
-            "source_reference": source_reference.strip(),
-            "content": content.strip(),
-            "publication_status": publication_status,
-            "recorded_at": utc_now(),
-        }
-        project["evidence"].append(evidence)
-        project["updated_at"] = utc_now()
-        self._write(project_id, project)
+        with _WRITE_LOCK:
+            project = self._read(project_id)
+            evidence = {
+                "evidence_id": f"ev-{uuid4().hex[:12]}",
+                "evidence_type": evidence_type,
+                "source_reference": source_reference.strip(),
+                "content": content.strip(),
+                "publication_status": publication_status,
+                "recorded_at": utc_now(),
+            }
+            project["evidence"].append(evidence)
+            project["updated_at"] = utc_now()
+            self._write(project_id, project)
         return deepcopy(evidence)
 
     def save_artifact(self, project_id: str, artifact: dict[str, Any]) -> dict[str, Any]:
-        project = self._read(project_id)
-        evidence_ids = {item["evidence_id"] for item in project.get("evidence", [])}
-        requested_ids = set(artifact.get("evidence_ids", []))
-        for line_item in artifact.get("line_items", []):
-            if isinstance(line_item, dict):
-                requested_ids.update(line_item.get("evidence_ids", []))
-        missing = sorted(requested_ids - evidence_ids)
-        if missing:
-            raise ValueError(f"unknown evidence_ids: {', '.join(missing)}")
-        project["artifacts"].append(deepcopy(artifact))
-        project["updated_at"] = utc_now()
-        self._write(project_id, project)
+        with _WRITE_LOCK:
+            project = self._read(project_id)
+            evidence_ids = {
+                item["evidence_id"] for item in project.get("evidence", [])
+            }
+            requested_ids = set(artifact.get("evidence_ids", []))
+            for line_item in artifact.get("line_items", []):
+                if isinstance(line_item, dict):
+                    requested_ids.update(line_item.get("evidence_ids", []))
+            missing = sorted(requested_ids - evidence_ids)
+            if missing:
+                raise ValueError(f"unknown evidence_ids: {', '.join(missing)}")
+            project["artifacts"].append(deepcopy(artifact))
+            project["updated_at"] = utc_now()
+            self._write(project_id, project)
         return deepcopy(artifact)
