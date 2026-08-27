@@ -76,6 +76,20 @@ Run the MCP server over stdio:
 uv run open-jobsite
 ```
 
+## One-minute Berd demo
+
+The [`demo/`](demo/) folder contains a synthetic end-to-end workflow, a prompt
+ready to paste into Berd, fixed expected results, Windows connection settings,
+and a preflight that launches the real STDIO server. Run it with:
+
+```bash
+uv run python demo/run_demo.py
+```
+
+The preflight is also part of GitHub Actions. It verifies the same evidence,
+calculation, estimate, daily log, and approval-gate flow used in the recorded
+Berd demonstration.
+
 Data defaults to `.open-jobsite-data/`. Select another local folder with either
 `--data-dir PATH` or the `OPEN_JOBSITE_DATA_DIR` environment variable.
 
