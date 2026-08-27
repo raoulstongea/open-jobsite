@@ -1,0 +1,15 @@
+extensions:
+  open-jobsite:
+    name: Open Jobsite
+    description: Local evidence and draft tools for construction operations
+    cmd: C:\absolute\path\to\uv.exe
+    args:
+      - run
+      - --directory
+      - C:\absolute\path\to\open-jobsite
+      - open-jobsite
+    enabled: true
+    envs:
+      OPEN_JOBSITE_DATA_DIR: C:\absolute\path\to\open-jobsite-demo-data
+    type: stdio
+    timeout: 300
