@@ -1,0 +1,55 @@
+{
+  "artifacts": [
+    {
+      "allowed_next_actions": ["review", "edit", "approve", "reject"],
+      "artifact_id": "draft-estimate-example001",
+      "artifact_type": "estimate",
+      "assumptions": ["Clear access during normal working hours"],
+      "created_at": "2026-08-27T12:00:00+00:00",
+      "currency": "CAD",
+      "evidence_ids": ["ev-example001"],
+      "exclusions": ["Painting and hidden-condition repairs"],
+      "external_action_performed": false,
+      "line_items": [
+        {
+          "amount": "55.50",
+          "description": "Synthetic wallboard",
+          "evidence_ids": ["ev-example001"],
+          "quantity": "3",
+          "unit": "sheet",
+          "unit_cost": "18.50",
+          "unit_math": "3 sheet × 18.50"
+        }
+      ],
+      "project_id": "synthetic-bathroom-01",
+      "requires_human_approval": true,
+      "schema_version": "0.1",
+      "status": "draft",
+      "title": "Synthetic wall repair",
+      "totals": {
+        "contingency": "0.00",
+        "contingency_percent": "0",
+        "subtotal": "55.50",
+        "tax": "0.00",
+        "tax_percent": "0",
+        "total": "55.50"
+      }
+    }
+  ],
+  "created_at": "2026-08-27T12:00:00+00:00",
+  "description": "Public demonstration data; no real address, client, tenant, or price book.",
+  "evidence": [
+    {
+      "content": "North wall measures 10 ft by 8 ft; one 3 ft by 7 ft opening.",
+      "evidence_id": "ev-example001",
+      "evidence_type": "measurement",
+      "publication_status": "synthetic",
+      "recorded_at": "2026-08-27T12:01:00+00:00",
+      "source_reference": "synthetic field card A"
+    }
+  ],
+  "name": "Synthetic bathroom repair",
+  "project_id": "synthetic-bathroom-01",
+  "schema_version": "0.1",
+  "updated_at": "2026-08-27T12:02:00+00:00"
+}
