@@ -1,0 +1,40 @@
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[project]
+name = "open-jobsite"
+version = "0.1.0"
+description = "An open, local-first, evidence-aware construction MCP server for goose"
+readme = "README.md"
+requires-python = ">=3.12"
+license = { text = "Apache-2.0" }
+authors = [
+  { name = "Raoul St-Onge Amoretti" },
+]
+keywords = ["goose", "mcp", "construction", "estimating", "field-operations"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "License :: OSI Approved :: Apache Software License",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Office/Business :: Financial",
+]
+dependencies = [
+  "mcp[cli]>=2.0,<3",
+  "pydantic>=2.11,<3",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.3,<9",
+]
+
+[project.scripts]
+open-jobsite = "open_jobsite:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/open_jobsite"]
+
+[tool.pytest.ini_options]
+addopts = "-q"
+testpaths = ["tests"]
